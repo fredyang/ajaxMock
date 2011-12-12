@@ -1,5 +1,5 @@
 /**
- * ajaxMock v0.1pre - A mock utilities for jQuery AJAX
+ * ajaxMock v0.1 - A mock for jQuery AJAX
  *
  * http://semanticsworks.com
  *
@@ -12,7 +12,7 @@
 	var mockDataType = "mock",
 		enableMock = false,
 		mocks = [],
-		getMockResult = function ( mergedOptions, originalOptions ) {
+		getMockValue = function ( mergedOptions, originalOptions ) {
 			for ( var i = 0; i < mocks.length; i++ ) {
 				var r = mocks[i]( mergedOptions, originalOptions );
 				if ( r !== undefined ) {
@@ -31,7 +31,7 @@
 			},
 
 			setup: function ( match, result ) {
-				var predicate = arguments.length === 1 ?
+				mocks.push( arguments.length === 1 ?
 					match :
 					function ( mergedOptions, originalOptions ) {
 
@@ -41,28 +41,36 @@
 								result( mergedOptions, originalOptions ) :
 								result;
 						}
-					}
-
-				mocks.push( predicate );
+					} );
 				return this;
 			},
 
+			nextValue: function ( result ) {
+				//put it the head, so that it will always evaluate first
+				mocks.unshift( function ( mergedOptions, originalOptions ) {
+					//remove itself immediately, so that it will not be evaluated again
+					mocks.shift();
+
+					return $.isFunction( result ) ? result( mergedOptions, originalOptions ) :
+						result;
+				} );
+			},
+
 			//expose it for testing the setup mock, otherwise it can be closured
-			mockResult: getMockResult
+			getMockValue: getMockValue
 		};
 
 	$.ajaxMock = ajaxMock;
 
-	ajaxMock.url = function (key, result) {
-		var match = key instanceof RegExp ? function (mergeOptions) {
-			return key.test(mergeOptions.url);
-		} : function (mergedOptions) {
+	ajaxMock.url = function ( key, result ) {
+		var match = key instanceof RegExp ? function ( mergeOptions ) {
+			return key.test( mergeOptions.url );
+		} : function ( mergedOptions ) {
 			return key === mergedOptions.url;
 		};
-		
-		return ajaxMock.setup(match, result);
-	};
 
+		return ajaxMock.setup( match, result );
+	};
 
 	$.ajaxSetup( {
 		converters: {
@@ -78,25 +86,25 @@
 		}
 	} )
 
-	$.ajaxPrefilter( function applyMockToAjax( mergedOptions, originalOptions, jqXhr ) {
+	$.ajaxPrefilter( function /*applyMockToAjax*/ ( mergedOptions, originalOptions, jqXhr ) {
 		if ( enableMock ) {
-			var r = getMockResult( mergedOptions, originalOptions );
+			var r = getMockValue( mergedOptions, originalOptions );
 			if ( r !== undefined ) {
-				mergedOptions.mockResult = r;
+				mergedOptions.mockValue = r;
 			}
 		}
 	} );
 
 	//put it to the head of transport builder list for data type "*" using "+" sign
 	//otherwise it will not be evaluated
-	$.ajaxTransport( "+*", function createMockTransport( mergedOptions, originalOptions, jqXhr ) {
-			if ( mergedOptions.mockResult ) {
+	$.ajaxTransport( "+*", function /*createMockTransport*/ ( mergedOptions, originalOptions, jqXhr ) {
+			if ( mergedOptions.mockValue ) {
 				return {
 					send: function ( headers, transportDone ) {
 
 						var responses = {};
 
-						responses[mockDataType] = mergedOptions.mockResult;
+						responses[mockDataType] = mergedOptions.mockValue;
 						transportDone( "200", "OK", responses );
 					},
 					abort: function () {}
