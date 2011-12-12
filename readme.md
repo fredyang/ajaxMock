@@ -1,20 +1,22 @@
 [ajaxMock](http://semanticsworks.com/) - A mock for jQuery AJAX
 ==================================================
+It is inspired by [gist:1445906](https://gist.github.com/1445906) by cowboy.
 
 How can you use it?
 --------------------------------------
 
-You can write your normal code as if you don't have it imported to your page. When you want to
-mock your ajax call, import it ajaxMock.js into your page.
+You can write your normal jQuery ajax code as usual. When you want to
+mock your ajax call, import it ajaxMock.js into your page, and follow the following code. The
+your ajax call will be served by the mock.
 
 
 $.ajaxMock.on();
 
 //for simple url mock use
 
-$.ajaxMock.url( urlOrUrlRegeEx, resultOrResultFunction);
+$.ajaxMock.url( urlOrUrlRegEx, resultOrResultFunction);
 
-//for full control use
+//for full control use, or develop your own higher level api use
 
 $.ajaxMock.setup(function match(mergedOptions, originalOptions) { return true;},
 function result(mergedOptions, originalOptions) { return mockValue});
