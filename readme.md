@@ -23,4 +23,4 @@ function result(mergedOptions, originalOptions) { return mockValue});
 
 $.ajaxMock.off();
 
-For more full usage details, see test case.
+For more full usage details, see [test case](https://github.com/fredyang/ajaxMock/blob/master/test/test.js).
