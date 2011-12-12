@@ -44,6 +44,7 @@
 					}
 
 				mocks.push( predicate );
+				return this;
 			},
 
 			//expose it for testing the setup mock, otherwise it can be closured
@@ -51,6 +52,17 @@
 		};
 
 	$.ajaxMock = ajaxMock;
+
+	ajaxMock.url = function (key, result) {
+		var match = key instanceof RegExp ? function (mergeOptions) {
+			return key.test(mergeOptions.url);
+		} : function (mergedOptions) {
+			return key === mergedOptions.url;
+		};
+		
+		return ajaxMock.setup(match, result);
+	};
+
 
 	$.ajaxSetup( {
 		converters: {
@@ -84,8 +96,6 @@
 
 						var responses = {};
 
-						//the name must be "mock", this is to match the dataType
-						//"mock", which is specified in the applyMockToAjax
 						responses[mockDataType] = mergedOptions.mockResult;
 						transportDone( "200", "OK", responses );
 					},
