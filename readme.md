@@ -11,13 +11,16 @@ mock your ajax call, import it ajaxMock.js into your page.
 $.ajaxMock.on();
 
 //for simple url mock use
+
 $.ajaxMock.url( urlOrUrlRegeEx, resultOrResultFunction);
 
 //for full control use
+
 $.ajaxMock.setup(function match(mergedOptions, originalOptions) { return true;},
 function result(mergedOptions, originalOptions) { return mockValue});
 
 //when you want to switch real ajax
+
 $.ajaxMock.off();
 
 For more full usage details, see test case.
