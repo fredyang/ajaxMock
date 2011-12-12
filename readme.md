@@ -6,7 +6,7 @@ How can you use it?
 --------------------------------------
 
 You can write your normal jQuery ajax code as usual. When you want to
-mock your ajax call, import it ajaxMock.js into your page, and follow the following code. The
+mock your ajax call, import it ajaxMock.js into your page, and use the following code, and 
 your ajax call will be served by the mock.
 
 
