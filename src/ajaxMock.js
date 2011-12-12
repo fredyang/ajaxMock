@@ -19,57 +19,61 @@
 					return r;
 				}
 			}
+		};
+
+	$.ajaxMock = {
+
+		on: function () {
+			enableMock = true;
 		},
-		ajaxMock = {
 
-			on: function () {
-				enableMock = true;
-			},
+		off: function () {
+			enableMock = false;
+		},
 
-			off: function () {
-				enableMock = false;
-			},
+		setup: function ( match, result ) {
+			mocks.push( arguments.length === 1 ?
+				match :
+				function ( mergedOptions, originalOptions ) {
 
-			setup: function ( match, result ) {
-				mocks.push( arguments.length === 1 ?
-					match :
-					function ( mergedOptions, originalOptions ) {
+					if ( match( mergedOptions, originalOptions ) ) {
 
-						if ( match( mergedOptions, originalOptions ) ) {
-
-							return $.isFunction( result ) ?
-								result( mergedOptions, originalOptions ) :
-								result;
-						}
-					} );
-				return this;
-			},
-
-			nextValue: function ( result ) {
-				//put it the head, so that it will always evaluate first
-				mocks.unshift( function ( mergedOptions, originalOptions ) {
-					//remove itself immediately, so that it will not be evaluated again
-					mocks.shift();
-
-					return $.isFunction( result ) ? result( mergedOptions, originalOptions ) :
-						result;
+						return $.isFunction( result ) ?
+							result( mergedOptions, originalOptions ) :
+							result;
+					}
 				} );
-			},
+			return this;
+		},
 
-			//expose it for testing the setup mock, otherwise it can be closured
-			getMockValue: getMockValue
-		};
+		nextValue: function ( result ) {
+			//put it the head, so that it will always evaluate first
+			mocks.unshift( function ( mergedOptions, originalOptions ) {
+				//remove itself immediately, so that it will not be evaluated again
+				mocks.shift();
 
-	$.ajaxMock = ajaxMock;
+				return $.isFunction( result ) ? result( mergedOptions, originalOptions ) :
+					result;
+			} );
+		},
 
-	ajaxMock.url = function ( key, result ) {
-		var match = key instanceof RegExp ? function ( mergeOptions ) {
-			return key.test( mergeOptions.url );
-		} : function ( mergedOptions ) {
-			return key === mergedOptions.url;
-		};
+		reset: function () {
+			mocks = [];
+		},
 
-		return ajaxMock.setup( match, result );
+
+		url : function ( key, result ) {
+			var match = key instanceof RegExp ? function ( mergeOptions ) {
+				return key.test( mergeOptions.url );
+			} : function ( mergedOptions ) {
+				return key === mergedOptions.url;
+			};
+
+			return this.setup( match, result );
+		},
+
+		//expose it for testing the setup mock, otherwise it can be closured
+		getMockValue: getMockValue
 	};
 
 	$.ajaxSetup( {

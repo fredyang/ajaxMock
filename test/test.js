@@ -19,9 +19,20 @@ test( "ajaxMock", function () {
 	});
 	equal(mockValue, "string result", "$.ajaxMock.getMockValue allow you to test your mockSetup");
 
+
 	$.get( "string" ).done( function ( data ) {
 		equal( data, "string result", "can get string" );
 	} );
+
+	ajaxMock.reset();
+
+	stop();
+	$.get( "string" ).fail( function ( data ) {
+		start();
+		ok( true, "after reset all the rules will be cleared, and your ajax call well fall back " +
+		          "to real ajax call" );
+	} );
+
 
 	ajaxMock.url( "json", {
 		result: "json result"
@@ -91,6 +102,6 @@ test( "ajaxMock", function () {
 
 
 	//increase the expect value if you add more assertions
-	expect(12);
+	expect(13);
 
 } )
