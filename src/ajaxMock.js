@@ -98,7 +98,7 @@
 	//put it to the head of transport builder list for data type "*" using "+" sign
 	//otherwise it will not be evaluated
 	$.ajaxTransport( "+*", function /*createMockTransport*/ ( mergedOptions, originalOptions, jqXhr ) {
-			if ( mergedOptions.mockValue ) {
+			if ( enableMock && mergedOptions.mockValue ) {
 				return {
 					send: function ( headers, transportDone ) {
 
