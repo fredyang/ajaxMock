@@ -91,7 +91,7 @@ test( "ajaxMock", function() {
 	ajaxMock.returnValueForAjaxCall( valueForNextAjaxCall );
 
 	$.get( "whatever" ).done( function( data ) {
-		equal( data, valueForNextAjaxCall, "ajaxMock.returnValueNextAjaxCall allow you setup a value for value for next ajax call" );
+		equal( data, valueForNextAjaxCall, "ajaxMock.returnValueForAjaxCall allow you setup a value for value for next ajax call" );
 	} );
 
 	//above ajax calls are synchronous, because they are fake
@@ -99,11 +99,15 @@ test( "ajaxMock", function() {
 	stop();
 	$.get( "whatever" ).fail( function( data ) {
 		start();
-		ok( true, "ajaxMock.returnValueNextAjaxCall allow you setup a value for value for next ajax call only, but not calls after the next" );
+		ok( true, "ajaxMock.returnValueForAjaxCall allow you setup a value for value for next ajax call only, but not calls after the next" );
 	} );
 
+	ajaxMock.reset();
+	url = "testsetup";
+	valueMappedToUrl = "testdata";
+
 	ajaxMock.setup( function predicate ( mergedOptions, originalOptions ) {
-		return (mergedOptions.url === "testsetup");
+		return (mergedOptions.url === url);
 
 	}, function result ( mergedOptions, originalOptions ) {
 		return originalOptions.data;
@@ -111,7 +115,7 @@ test( "ajaxMock", function() {
 
 	$.get( "testsetup", "testdata" ).done( function( data ) {
 
-		equal( data, "testdata", "ajaxMock.setup allow you greater control how to fake values and " +
+		equal( data, valueMappedToUrl, "ajaxMock.setup allow you greater control how to fake values and " +
 		                         "you can use it to build power api like $.ajaxMock.url" );
 
 	} );
