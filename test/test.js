@@ -72,22 +72,26 @@ test( "ajaxMock", function() {
 	} );
 
 
-	ajaxMock.url( /^testregex/, function() {
-		return "regex";
-	} );
+	url = /^testregex/;
+	valueMappedToUrl = "regex";
+	ajaxMock.url( url, valueMappedToUrl );
 
 	$.get( "testregex1" ).done( function( data ) {
-		equal( data, "regex", "url can be an regular expression" );
+		equal( data, valueMappedToUrl, "url can be an regular expression" );
 	} );
 
 	$.get( "testregex2" ).done( function( data ) {
-		equal( data, "regex", "url can be an regular expression 2" );
+		equal( data, valueMappedToUrl, "url can be an regular expression 2" );
 	} );
 
-	ajaxMock.nextValue( "nextValue" );
+	ajaxMock.reset();
+
+	var valueForNextAjaxCall = "returnValueForAjaxCall";
+
+	ajaxMock.returnValueForAjaxCall( valueForNextAjaxCall );
 
 	$.get( "whatever" ).done( function( data ) {
-		equal( data, "nextValue", "ajaxMock.nextValue allow you setup a value for value for next ajax call" );
+		equal( data, valueForNextAjaxCall, "ajaxMock.returnValueNextAjaxCall allow you setup a value for value for next ajax call" );
 	} );
 
 	//above ajax calls are synchronous, because they are fake
@@ -95,10 +99,10 @@ test( "ajaxMock", function() {
 	stop();
 	$.get( "whatever" ).fail( function( data ) {
 		start();
-		ok( true, "ajaxMock.nextValue allow you setup a value for value for next ajax call only, but not calls after the next" );
+		ok( true, "ajaxMock.returnValueNextAjaxCall allow you setup a value for value for next ajax call only, but not calls after the next" );
 	} );
 
-	ajaxMock.setup( function match ( mergedOptions, originalOptions ) {
+	ajaxMock.setup( function predicate ( mergedOptions, originalOptions ) {
 		return (mergedOptions.url === "testsetup");
 
 	}, function result ( mergedOptions, originalOptions ) {
