@@ -11,10 +11,11 @@
 
 	var mockDataType = "mock",
 		enableMock = false,
-		mocks = [],
-		getMockValue = function ( mergedOptions, originalOptions ) {
-			for ( var i = 0; i < mocks.length; i++ ) {
-				var r = mocks[i]( mergedOptions, originalOptions );
+		mockValueFinders = [],
+
+		tryGetMockValue = function ( ajaxMergedOptions, ajaxOriginalOptions ) {
+			for ( var i = 0; i < mockValueFinders.length; i++ ) {
+				var r = mockValueFinders[i]( ajaxMergedOptions, ajaxOriginalOptions );
 				if ( r !== undefined ) {
 					return r;
 				}
@@ -31,15 +32,15 @@
 			enableMock = false;
 		},
 
-		setup: function ( match, result ) {
-			mocks.push( arguments.length === 1 ?
-				match :
-				function ( mergedOptions, originalOptions ) {
-
-					if ( match( mergedOptions, originalOptions ) ) {
+		setup: function ( predicate, result ) {
+			mockValueFinders.push( arguments.length === 1 ?
+				predicate :
+				function ( ajaxMergedOptions, ajaxOriginalOptions ) {
+					debugger;
+					if ( predicate( ajaxMergedOptions, ajaxOriginalOptions ) ) {
 
 						return $.isFunction( result ) ?
-							result( mergedOptions, originalOptions ) :
+							result( ajaxMergedOptions, ajaxOriginalOptions ) :
 							result;
 					}
 				} );
@@ -48,32 +49,32 @@
 
 		nextValue: function ( result ) {
 			//put it the head, so that it will always evaluate first
-			mocks.unshift( function ( mergedOptions, originalOptions ) {
+			mockValueFinders.unshift( function ( ajaxMergedOptions, ajaxOriginalOptions ) {
 				//remove itself immediately, so that it will not be evaluated again
-				mocks.shift();
+				mockValueFinders.shift();
 
-				return $.isFunction( result ) ? result( mergedOptions, originalOptions ) :
+				return $.isFunction( result ) ? result( ajaxMergedOptions, ajaxOriginalOptions ) :
 					result;
 			} );
 		},
 
 		reset: function () {
-			mocks = [];
+			mockValueFinders = [];
 		},
 
 
-		url : function ( key, result ) {
-			var match = key instanceof RegExp ? function ( mergeOptions ) {
-				return key.test( mergeOptions.url );
+		url : function ( urlPredicate, result ) {
+			var predicate = urlPredicate instanceof RegExp ? function ( ajaxMergeOptions ) {
+				return urlPredicate.test( ajaxMergeOptions.url );
 			} : function ( mergedOptions ) {
-				return key === mergedOptions.url;
+				return urlPredicate === mergedOptions.url;
 			};
 
-			return this.setup( match, result );
-		},
+			return this.setup( predicate, result );
+		}
 
 		//expose it for testing the setup mock, otherwise it can be closured
-		getMockValue: getMockValue
+		//tryGetMockValue: tryGetMockValue
 	};
 
 	$.ajaxSetup( {
@@ -90,11 +91,11 @@
 		}
 	} )
 
-	$.ajaxPrefilter( function /*applyMockToAjax*/ ( mergedOptions, originalOptions, jqXhr ) {
+	$.ajaxPrefilter( function /*applyMockToAjax*/ ( ajaxMergedOptions, ajaxOriginalOptions, jqXhr ) {
 		if ( enableMock ) {
-			var r = getMockValue( mergedOptions, originalOptions );
+			var r = tryGetMockValue( ajaxMergedOptions, ajaxOriginalOptions );
 			if ( r !== undefined ) {
-				mergedOptions.mockValue = r;
+				ajaxMergedOptions.mockValue = r;
 			}
 		}
 	} );
@@ -106,8 +107,8 @@
 				return {
 					send: function ( headers, transportDone ) {
 
+						debugger;
 						var responses = {};
-
 						responses[mockDataType] = mergedOptions.mockValue;
 						transportDone( "200", "OK", responses );
 					},
