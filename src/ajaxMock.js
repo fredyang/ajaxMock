@@ -9,13 +9,12 @@
  */
 (function( $ ) {
 
-	var enableMock = false,
+	var enableMock = true,
 		mockValueMappers = [],
 
-		tryGetMockValue = function( ajaxMergedOptions, ajaxOriginalOptions ) {
-
+		tryGetMockValue = function( url, params ) {
 			for (var i = 0; i < mockValueMappers.length; i++) {
-				var r = mockValueMappers[i]( ajaxOriginalOptions.url, ajaxOriginalOptions.data );
+				var r = mockValueMappers[i]( url, params );
 				if (r !== undefined) {
 					return r;
 				}
@@ -23,6 +22,8 @@
 		};
 
 	$.ajaxMock = {
+
+		mockValueMappers: mockValueMappers,
 
 		on: function() {
 			enableMock = true;
@@ -104,11 +105,7 @@
 		converters: {
 			//mock is the final data type
 			"mock json": function( data ) {
-				debugger;
-				if (typeof data === "object") {
-					return data;
-				}
-				return $.parseJSON( data );
+				return data;
 			},
 			//"mock html": window.String,
 			"mock html": true,
@@ -121,7 +118,14 @@
 	//prefilter is used modified ajaxMergedOptions
 	$.ajaxPrefilter( function /*applyMockToAjax*/ ( ajaxMergedOptions, ajaxOriginalOptions, jqXhr ) {
 		if (enableMock) {
-			var r = tryGetMockValue( ajaxMergedOptions, ajaxOriginalOptions );
+			if (ajaxOriginalOptions.dataType == "json" && typeof ajaxOriginalOptions.data == "string") {
+				try {
+					ajaxOriginalOptions.data = JSON.parse(ajaxOriginalOptions.data);
+				}
+				catch(e) { }
+			}
+
+			var r = tryGetMockValue( ajaxOriginalOptions.url, ajaxOriginalOptions.data );
 			if (r !== undefined) {
 				ajaxMergedOptions.mockValue = r;
 			}
