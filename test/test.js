@@ -45,9 +45,7 @@ test( "ajaxMock", function() {
 		equal( data, valueMappedToUrl, "can get json" );
 	} );
 
-
 	ajaxMock.reset();
-
 
 	valueMappedToUrl = "var scriptResult = true;"
 	ajaxMock.url( url, valueMappedToUrl );
@@ -61,8 +59,7 @@ test( "ajaxMock", function() {
 		name: "john"
 	};
 
-	ajaxMock.url( url, function( ajaxMergedOptions, ajaxOriginalOptions ) {
-		var userPrameter = ajaxOriginalOptions.data;
+	ajaxMock.url( url, function( userPrameter ) {
 		equal( userPrameter, param, "original data can be retrieve in originalOptions.data" );
 		return userPrameter;
 	} );
@@ -71,6 +68,7 @@ test( "ajaxMock", function() {
 		equal( data, param, "can retrieve data from a result function" );
 	} );
 
+	ajaxMock.reset();
 
 	url = /^testregex/;
 	valueMappedToUrl = "regex";
@@ -90,33 +88,35 @@ test( "ajaxMock", function() {
 
 	ajaxMock.returnValueForAjaxCall( valueForNextAjaxCall );
 
-	$.get( "whatever" ).done( function( data ) {
+	$.get( "whateverUrl" ).done( function( data ) {
 		equal( data, valueForNextAjaxCall, "ajaxMock.returnValueForAjaxCall allow you setup a value for value for next ajax call" );
 	} );
+
+	ajaxMock.reset();
 
 	//above ajax calls are synchronous, because they are fake
 	//the following can not be faked, so it is async
 	stop();
-	$.get( "whatever" ).fail( function( data ) {
+
+	$.get( "whateverUrl" ).fail( function( data ) {
 		start();
 		ok( true, "ajaxMock.returnValueForAjaxCall allow you setup a value for value for next ajax call only, but not calls after the next" );
 	} );
 
-	ajaxMock.reset();
 	url = "testsetup";
 	valueMappedToUrl = "testdata";
 
-	ajaxMock.setup( function predicate ( mergedOptions, originalOptions ) {
-		return (mergedOptions.url === url);
+	ajaxMock.setup( function predicate ( myurl ) {
+		return (myurl === url);
 
-	}, function result ( mergedOptions, originalOptions ) {
-		return originalOptions.data;
+	}, function result ( data ) {
+		return data;
 	} );
 
 	$.get( "testsetup", "testdata" ).done( function( data ) {
 
 		equal( data, valueMappedToUrl, "ajaxMock.setup allow you greater control how to fake values and " +
-		                         "you can use it to build power api like $.ajaxMock.url" );
+		                               "you can use it to build power api like $.ajaxMock.url" );
 
 	} );
 
