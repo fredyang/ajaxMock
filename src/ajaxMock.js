@@ -33,6 +33,8 @@
 		},
 
 		//support setup(predicateFunction, resultFunction)
+		//predicateFunction is function (url, params) { }
+		//resultFunction is function (params) { }
 		setup: function( predicate, result ) {
 
 			var mapper;
