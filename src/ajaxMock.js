@@ -135,7 +135,7 @@
 	//put it to the head of transport builder list for data type "*" using "+" sign
 	//otherwise it will not be evaluated
 	$.ajaxTransport( "+*", function /*createMockTransport*/ ( mergedOptions, originalOptions, jqXhr ) {
-			if (enableMock && mergedOptions.mockValue) {
+			if (enableMock && mergedOptions.mockValue !== undefined) {
 				//if mark value is defined, hi-jack the ajax call to return a
 				//fake transport
 				return {
