@@ -12,10 +12,10 @@
 	var enableMock = true,
 		mockValueMappers = [],
 
-		tryGetMockValue = function( url, params ) {
+		tryGetMockValue = function( url, params, ajaxOriginalOptions ) {
 			for (var i = 0; i < mockValueMappers.length; i++) {
-				var r = mockValueMappers[i]( url, params );
-				if (r !== undefined) {
+				var r = mockValueMappers[i]( url, params, ajaxOriginalOptions );
+				if (r) {
 					return r;
 				}
 			}
@@ -36,20 +36,22 @@
 		//support setup(predicateFunction, resultFunction)
 		//predicateFunction is function (url, params) { }
 		//resultFunction is function (params) { }
-		setup: function( predicate, result ) {
+		setup: function( predicate, morkValue ) {
 
 			var mapper;
 
 			if (arguments.length === 1) {
 				mapper = predicate
 			} else {
-				mapper = function( url, params ) {
+				mapper = function( url, params, ajaxOriginalOptions ) {
 
-					if (predicate( url, params )) {
+					if (predicate( url, params, ajaxOriginalOptions )) {
 
-						return $.isFunction( result ) ?
-							result( params ) :
-							result;
+						return {
+							value: $.isFunction( morkValue ) ?
+								morkValue( params, ajaxOriginalOptions ) :
+								morkValue
+						};
 					}
 				};
 			}
@@ -77,7 +79,7 @@
 
 		//url can be regular expression or static string
 		//result can be a fix object value or a function like function (params) {}
-		url: function( predefinedUrl, result ) {
+		url: function( predefinedUrl, morkValue ) {
 
 			var predicate;
 
@@ -93,7 +95,7 @@
 				};
 			}
 
-			return this.setup( predicate, result );
+			return this.setup( predicate, morkValue );
 		}
 
 		//expose it for testing the setup mock, otherwise it can be closured
@@ -126,8 +128,8 @@
 				catch (e) {}
 			}
 
-			var r = tryGetMockValue( ajaxOriginalOptions.url, ajaxOriginalOptions.data );
-			if (r !== undefined) {
+			var r = tryGetMockValue( ajaxOriginalOptions.url, ajaxOriginalOptions.data, ajaxOriginalOptions );
+			if (r) {
 				ajaxMergedOptions.mockValue = r;
 			}
 		}
@@ -149,7 +151,7 @@
 							//fake a responses object
 							{
 								//mock is the data type, which will be used in converters
-								mock: mergedOptions.mockValue
+								mock: mergedOptions.mockValue.value
 							} )
 						;
 					},
