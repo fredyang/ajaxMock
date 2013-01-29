@@ -77,19 +77,19 @@
 
 		//url can be regular expression or static string
 		//result can be a fix object value or a function like function (params) {}
-		url: function( url, result ) {
+		url: function( predefinedUrl, result ) {
 
 			var predicate;
 
-			if (url instanceof RegExp) {
+			if (predefinedUrl instanceof RegExp) {
 
 				predicate = function( userUrl ) {
-					return url.test( userUrl );
+					return predefinedUrl.test( userUrl );
 				};
 
 			} else {
 				predicate = function( url ) {
-					return url === url;
+					return predefinedUrl === url;
 				};
 			}
 
@@ -118,11 +118,12 @@
 	//prefilter is used modified ajaxMergedOptions
 	$.ajaxPrefilter( function /*applyMockToAjax*/ ( ajaxMergedOptions, ajaxOriginalOptions, jqXhr ) {
 		if (enableMock) {
+			//debugger;
 			if (ajaxOriginalOptions.dataType == "json" && typeof ajaxOriginalOptions.data == "string") {
 				try {
-					ajaxOriginalOptions.data = JSON.parse(ajaxOriginalOptions.data);
+					ajaxOriginalOptions.data = JSON.parse( ajaxOriginalOptions.data );
 				}
-				catch(e) { }
+				catch (e) {}
 			}
 
 			var r = tryGetMockValue( ajaxOriginalOptions.url, ajaxOriginalOptions.data );
@@ -138,8 +139,11 @@
 			if (enableMock && mergedOptions.mockValue !== undefined) {
 				//if mark value is defined, hi-jack the ajax call to return a
 				//fake transport
+				//debugger;
 				return {
 					send: function( headers, transportDone ) {
+						//instead of sending a request to xhr
+						//shortcut to return the result immediately
 
 						transportDone( "200", "OK",
 							//fake a responses object
