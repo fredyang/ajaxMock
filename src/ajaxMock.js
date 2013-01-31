@@ -102,18 +102,15 @@
 		//tryGetMockValue: tryGetMockValue
 	};
 
+	function pass (data) { return data;}
+
 	$.ajaxSetup( {
 		//extract responses.mock
 		converters: {
-			//mock is the final data type
-			"mock json": function( data ) {
-				return data;
-			},
-			//"mock html": window.String,
-			"mock html": true,
-			"mock xml": $.parseXML
-			//no need "mock text", as we already have "* text"
-			//"mock text" : window.String
+			"mock json": pass,
+			"mock html": pass,
+			"mock xml": $.parseXML,
+			"mock text" : pass
 		}
 	} )
 
